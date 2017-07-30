@@ -10,23 +10,27 @@ import android.util.Log;
  */
 
 public class SQLiteHelper extends SQLiteOpenHelper {
-    public static final String TABLE_NAME = "items";
+    public static final String TABLE_NAME = "receipt";
     public static final String DATABASE_NAME = "Expenser";
     public static final int DATABASE_VERSION = 1;
 
     public static final String COLUMN_ID = "id";
+    public static final String COLUMN_USERID = "userId";
     public static final String COLUMN_TOTAL = "total";
     public static final String COLUMN_DATE = "date";
     public static final String COLUMN_CATEGORY = "category";
     public static final String COLUMN_PEOPLE = "people";
+    public static final String COLUMN_AVERAGE = "average";
 
     private static final String DATABASE_CREATE =
             "CREATE TABLE " + TABLE_NAME
-            + "(_id integer primary key autoincrement,"
-            + "total INT, "
-            + "date TEXT, "
-            + "category TEXT, "
-            + "people INT);";
+                    + "(_id integer primary key autoincrement,"
+                    + "userId TEXT, "
+                    + "total REAL, "
+                    + "date TEXT, "
+                    + "category TEXT, "
+                    + "people INT, "
+                    + "average REAL);";
 
     /**
      * @param context * @param name * @param factory * @param version */

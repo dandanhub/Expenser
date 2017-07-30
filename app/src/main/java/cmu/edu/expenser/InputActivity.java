@@ -2,19 +2,18 @@ package cmu.edu.expenser;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.FragmentTransaction;
 import android.content.Context;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -36,6 +35,7 @@ public class InputActivity extends AppCompatActivity {
             Toast myToast = Toast.makeText(context, "Save Event Clicked!", Toast.LENGTH_SHORT);
             myToast.show();
             saveItem();
+            finish();
         }
     };
 
@@ -62,9 +62,8 @@ public class InputActivity extends AppCompatActivity {
 
         peopleEditText = (EditText) findViewById(R.id.peopleEditText);
 
-
-        Button saveEventButton = (Button) findViewById(R.id.saveItemButton);
-        saveEventButton.setOnClickListener(saveItemButtonClicked);
+        saveItemButton = (Button) findViewById(R.id.saveItemButton);
+        saveItemButton.setOnClickListener(saveItemButtonClicked);
     }
 
     public static class DatePickerFragment extends DialogFragment
@@ -91,12 +90,18 @@ public class InputActivity extends AppCompatActivity {
         }
     }
 
+//    public void refreshListView() {
+//        HomeFragment homeFragment = (HomeFragment) MainActivity.homeFragment;
+//        homeFragment.refresh();
+//    }
+
     private void saveItem() {
         ItemDAO dbhelper = new ItemDAO(this);
-        int total = Integer.valueOf(totalEditText.getText().toString());
-        String dateString = dateEditText.toString();
+        String userId = "test";
+        double total = Double.valueOf(totalEditText.getText().toString());
+        String dateString = dateEditText.getText().toString();
         String category = categorySpinner.getSelectedItem().toString();
         int people = Integer.valueOf(peopleEditText.getText().toString());
-        dbhelper.insertItem(total, dateString, category, people);
+        dbhelper.insertItem(userId, total, dateString, category, people);
     }
 }

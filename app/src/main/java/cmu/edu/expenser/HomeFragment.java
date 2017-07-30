@@ -4,18 +4,23 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.app.Fragment;
+import android.widget.CursorAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.support.annotation.NonNull;
 
@@ -64,6 +69,10 @@ public class HomeFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    private ListView mListView;
+    private Cursor result;
+    private CursorAdapter itemAdapter;
+
     private OnFragmentInteractionListener mListener;
 
     public HomeFragment() {
@@ -95,6 +104,14 @@ public class HomeFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        result = readItems();
+        String[] from = new String[] { SQLiteHelper.COLUMN_TOTAL, SQLiteHelper.COLUMN_DATE,
+                SQLiteHelper.COLUMN_CATEGORY, SQLiteHelper.COLUMN_PEOPLE, SQLiteHelper.COLUMN_AVERAGE};
+        int[] to = new int[] {R.id.itemTotal, R.id.itemDate, R.id.itemCategory, R.id.itemPeople, R.id.itemAvg};
+        itemAdapter = new SimpleCursorAdapter(getContext(), R.layout.item_list,
+                result, from, to, 0);
+        // itemAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -102,6 +119,9 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_home, container, false); //set the Adapter
+
+        mListView = (ListView) view.findViewById(android.R.id.list);
+        mListView.setAdapter(itemAdapter);
 
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.floatBtn);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -112,6 +132,19 @@ public class HomeFragment extends Fragment {
         });
 
         return view;
+    }
+
+    public void refresh() {
+        Log.d("on refresh", "called");
+        // mListView.invalidateViews();
+        Cursor newCursor = readItems();
+//        String[] from = new String[] { SQLiteHelper.COLUMN_TOTAL, SQLiteHelper.COLUMN_DATE,
+//                SQLiteHelper.COLUMN_CATEGORY, SQLiteHelper.COLUMN_PEOPLE, SQLiteHelper.COLUMN_AVERAGE};
+//        int[] to = new int[] {R.id.itemTotal, R.id.itemDate, R.id.itemCategory, R.id.itemPeople, R.id.itemAvg};
+//        itemAdapter = new SimpleCursorAdapter(getContext(), R.layout.item_list,
+//                result, from, to, 0);
+        result = itemAdapter.swapCursor(newCursor);
+        itemAdapter.notifyDataSetChanged();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -151,5 +184,13 @@ public class HomeFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    private Cursor readItems() {
+        ItemDAO itemDao = new ItemDAO(getContext());
+        String userId = "test";
+        result = itemDao.getAllItems(userId);
+        // Log.e("result size", String.valueOf(result.getCount()));
+        return result;
     }
 }

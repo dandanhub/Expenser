@@ -1,21 +1,18 @@
 package cmu.edu.expenser;
 
-
-import com.google.api.client.util.DateTime;
-
 import java.util.Date;
-
-import static android.R.attr.name;
 
 /**
  * Created by dandanshi on 29/07/2017.
  */
 
 public class Item {
-    private int total;
+    private String userId;
+    private double total;
     private Date date;
     private String category;
     private int people;
+    private double average;
 
     private static long counter = 0;
 
@@ -23,15 +20,22 @@ public class Item {
 
     }
 
-    public Item(int total, Date date, String category, int people){
+    public Item(String userId, double total, Date date, String category, int people){
+        this.userId = userId;
         this.total = total;
         this.date = date;
         this.category = category;
         this.people = people;
+        this.average = total / people;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public void setTotal(int total) {
         this.total = total;
+        this.average = total / this.people;
     }
 
     public void setDate(Date total) {
@@ -44,9 +48,14 @@ public class Item {
 
     public void setPeople(int people) {
         this.people = people;
+        this.average = this.total / people;
     }
 
-    public int getTotal() {
+    public String getUserId() {
+        return userId;
+    }
+
+    public double getTotal() {
         return total;
     }
 
@@ -60,5 +69,9 @@ public class Item {
 
     public int getPeople() {
         return people;
+    }
+
+    public double getAverage() {
+        return average;
     }
 }

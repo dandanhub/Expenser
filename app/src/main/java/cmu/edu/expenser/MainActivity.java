@@ -11,6 +11,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,9 +20,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-
 public class MainActivity extends AppCompatActivity
-        implements HomeFragment.OnFragmentInteractionListener, SummaryFragment.OnFragmentInteractionListener{
+        implements HomeFragment.OnFragmentInteractionListener,
+        SummaryFragment.OnFragmentInteractionListener {
+
+    HomeFragment homeFragment;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -55,6 +58,27 @@ public class MainActivity extends AppCompatActivity
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
+        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                Log.d("MainActivity", "onPageSelected");
+                if (position == 0) {
+                    Log.d("MainActivity", "Postion = 0");
+                    homeFragment.refresh();
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
     }
 
 
@@ -148,6 +172,16 @@ public class MainActivity extends AppCompatActivity
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+//        public void onPageSelected(int position)
+//        {
+//            switch (position) {
+//                case 0:
+//                    homeFragment.refresh();
+//                default:
+//                    break;
+//            }
+//        }
+
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
@@ -158,7 +192,8 @@ public class MainActivity extends AppCompatActivity
             // Return a PlaceholderFragment (defined as a static inner class below).
             switch (position) {
                 case 0:
-                    return new HomeFragment();
+                    homeFragment = new HomeFragment();
+                    return homeFragment;
                 case 1:
                     return new SummaryFragment();
                 default:
