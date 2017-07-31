@@ -21,6 +21,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_CATEGORY = "category";
     public static final String COLUMN_PEOPLE = "people";
     public static final String COLUMN_AVERAGE = "average";
+    public static final String COLUMN_PHOTOURI = "photoUri";
 
     private static final String DATABASE_CREATE =
             "CREATE TABLE " + TABLE_NAME
@@ -30,7 +31,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     + "date TEXT, "
                     + "category TEXT, "
                     + "people INT, "
-                    + "average REAL);";
+                    + "average REAL, "
+                    + "photoUri TEXT);";
 
     /**
      * @param context * @param name * @param factory * @param version */

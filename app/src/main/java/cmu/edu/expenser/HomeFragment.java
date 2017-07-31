@@ -107,11 +107,16 @@ public class HomeFragment extends Fragment {
 
         result = readItems();
         String[] from = new String[] { SQLiteHelper.COLUMN_TOTAL, SQLiteHelper.COLUMN_DATE,
-                SQLiteHelper.COLUMN_CATEGORY, SQLiteHelper.COLUMN_PEOPLE, SQLiteHelper.COLUMN_AVERAGE};
-        int[] to = new int[] {R.id.itemTotal, R.id.itemDate, R.id.itemCategory, R.id.itemPeople, R.id.itemAvg};
+                SQLiteHelper.COLUMN_CATEGORY, SQLiteHelper.COLUMN_PEOPLE};
+        int[] to = new int[] {R.id.itemTotal, R.id.itemDate, R.id.itemCategory, R.id.itemPeople};
         itemAdapter = new SimpleCursorAdapter(getContext(), R.layout.item_list,
                 result, from, to, 0);
         // itemAdapter.notifyDataSetChanged();
+    }
+
+    public void onResume() {
+        super.onResume();
+        refresh();
     }
 
     @Override

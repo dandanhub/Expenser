@@ -59,9 +59,9 @@ public class InputActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_dropdown_item, items);
         categorySpinner.setAdapter(adapter);
+        categorySpinner.setSelection(0);
 
         peopleEditText = (EditText) findViewById(R.id.peopleEditText);
-
         saveItemButton = (Button) findViewById(R.id.saveItemButton);
         saveItemButton.setOnClickListener(saveItemButtonClicked);
     }

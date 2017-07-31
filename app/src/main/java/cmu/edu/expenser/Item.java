@@ -13,19 +13,20 @@ public class Item {
     private String category;
     private int people;
     private double average;
-    
+    private String photoUri;
 
     public Item(){
 
     }
 
-    public Item(String userId, double total, Date date, String category, int people){
+    public Item(String userId, double total, Date date, String category, int people, String photoUri){
         this.userId = userId;
         this.total = total;
         this.date = date;
         this.category = category;
         this.people = people;
         this.average = total / people;
+        this.photoUri = photoUri;
     }
 
     public void setUserId(String userId) {
@@ -50,6 +51,10 @@ public class Item {
         this.average = this.total / people;
     }
 
+    public void setPhotoUri(String photoUri) {
+        this.photoUri = photoUri;
+    }
+
     public String getUserId() {
         return userId;
     }
@@ -72,5 +77,9 @@ public class Item {
 
     public double getAverage() {
         return average;
+    }
+
+    public String getPhotoUri() {
+        return photoUri;
     }
 }

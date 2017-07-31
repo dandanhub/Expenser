@@ -4,29 +4,46 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/itemTotal"
-        android:layout_width="wrap_content"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Date" />
-    <TextView
-        android:id="@+id/itemDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Total" />
-    <TextView
-        android:id="@+id/itemCategory"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Category" />
-    <TextView
-        android:id="@+id/itemPeople"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="People" />
-    <TextView
-        android:id="@+id/itemAvg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Average" />
+        android:orientation="horizontal">
+        <ImageView
+            android:id="@+id/main_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:scaleType="fitCenter"
+            android:layout_gravity="left" />
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/itemTotal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date" />
+            <TextView
+                android:id="@+id/itemDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Total" />
+            <TextView
+                android:id="@+id/itemCategory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Category" />
+            <TextView
+                android:id="@+id/itemPeople"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="People" />
+            <!--<TextView-->
+                <!--android:id="@+id/itemAvg"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="Average" />-->
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

@@ -1,6 +1,9 @@
 package cmu.edu.expenser;
 
 import android.Manifest;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -9,12 +12,19 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,10 +45,19 @@ import com.google.api.services.vision.v1.model.Image;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import java.util.Date;
 
 public class OCRActivity extends AppCompatActivity {
 
@@ -53,8 +72,29 @@ public class OCRActivity extends AppCompatActivity {
     public static final int CAMERA_PERMISSIONS_REQUEST = 2;
     public static final int CAMERA_IMAGE_REQUEST = 3;
 
-    private TextView mImageDetails;
-    private ImageView mMainImage;
+    private static TextView mImageDetails;
+    private static ImageView mMainImage;
+    private static EditText totalEditText;
+    private static EditText dateEditText;
+    private static Spinner categorySpinner;
+    private static EditText peopleEditText;
+    private static Button saveItemButton;
+
+    private long counter = 0;
+    private String mCurrentPhotoPath;
+
+    private Bitmap bitmap;
+
+    View.OnClickListener saveItemButtonClicked = new View.OnClickListener(){
+        @Override
+        public void onClick(View v) {
+            Context context = getApplicationContext();
+            Toast myToast = Toast.makeText(context, "Save Event Clicked!", Toast.LENGTH_SHORT);
+            myToast.show();
+            saveItem();
+            finish();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,8 +120,67 @@ public class OCRActivity extends AppCompatActivity {
 
         mImageDetails = (TextView) findViewById(R.id.image_details);
         mMainImage = (ImageView) findViewById(R.id.main_image);
+
+        totalEditText = (EditText) findViewById(R.id.totalEditText);
+        dateEditText = (EditText) findViewById(R.id.dateEditText);
+        dateEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogFragment newFragment = new DatePickerFragment();
+                newFragment.show(getSupportFragmentManager(), "datePicker");
+            }
+        });
+
+        categorySpinner = (Spinner) findViewById(R.id.categorySpinner);
+        String[] items = new String[]{"Meal", "Shopping", "House", "Transportation", "Others"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_dropdown_item, items);
+        categorySpinner.setAdapter(adapter);
+        categorySpinner.setSelection(0);
+
+        peopleEditText = (EditText) findViewById(R.id.peopleEditText);
+
+        saveItemButton = (Button) findViewById(R.id.saveItemButton);
+        saveItemButton.setOnClickListener(saveItemButtonClicked);
     }
 
+    public static class DatePickerFragment extends DialogFragment
+            implements DatePickerDialog.OnDateSetListener {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Calendar c = Calendar.getInstance();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+            DatePickerDialog dialog = new DatePickerDialog(getActivity(), this, year, month, day);
+            dialog.getDatePicker().setMaxDate(c.getTimeInMillis());
+            return dialog;
+        }
+
+        @Override
+        public void onDateSet(DatePicker view, int year, int month, int day) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(year, month, day);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String dateString = sdf.format(calendar.getTime());
+            dateEditText.setText(dateString);
+        }
+    }
+
+    private void saveItem() {
+        String partFilename = currentDateFormat();
+        storeCameraPhotoInSDCard(bitmap, partFilename);
+        Log.d("image path", partFilename);
+
+        ItemDAO dbhelper = new ItemDAO(this);
+        String userId = "test";
+        double total = Double.valueOf(totalEditText.getText().toString());
+        String dateString = dateEditText.getText().toString();
+        String category = categorySpinner.getSelectedItem().toString();
+        int people = Integer.valueOf(peopleEditText.getText().toString());
+        dbhelper.insertItem(userId, total, dateString, category, people);
+    }
 
     public void startGalleryChooser() {
         if (PermissionUtils.requestPermission(this, GALLERY_PERMISSIONS_REQUEST, Manifest.permission.READ_EXTERNAL_STORAGE)) {
@@ -147,10 +246,8 @@ public class OCRActivity extends AppCompatActivity {
         if (uri != null) {
             try {
                 // scale the image to save on bandwidth
-                Bitmap bitmap =
-                        scaleBitmapDown(
-                                MediaStore.Images.Media.getBitmap(getContentResolver(), uri),
-                                1200);
+                bitmap = scaleBitmapDown(
+                        MediaStore.Images.Media.getBitmap(getContentResolver(), uri), 1200);
 
                 callCloudVision(bitmap);
                 mMainImage.setImageBitmap(bitmap);
@@ -250,9 +347,42 @@ public class OCRActivity extends AppCompatActivity {
             }
 
             protected void onPostExecute(String result) {
-                mImageDetails.setText(result);
+                String total = parseTotal(result);
+                mImageDetails.setText("");
+                totalEditText.setText(total);
             }
         }.execute();
+    }
+
+    private String parseTotal(String str) {
+        double total = 0.00;
+        Pattern pattern = Pattern.compile("\\d+\\.\\d{2}");
+        Matcher matcher = pattern.matcher(str);
+        while(matcher.find()) {
+            try {
+                double d = Double.valueOf(matcher.group());
+                if (total < d) {
+                    total = d;
+                }
+            }
+            catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return String.valueOf(total);
+    }
+
+    private String parseDate(String str) {
+        double total = 0.00;
+        String[] tokens = str.split("\\d+\\.\\d{2}");
+        for (int i = 0; i < tokens.length; i++) {
+            double d = Double.parseDouble(tokens[i]);
+            if (total < d) {
+                total = d;
+            }
+        }
+        return String.valueOf(total);
     }
 
     public Bitmap scaleBitmapDown(Bitmap bitmap, int maxDimension) {
@@ -292,4 +422,24 @@ public class OCRActivity extends AppCompatActivity {
         return message;
     }
 
+    private void storeCameraPhotoInSDCard(Bitmap bitmap, String currentDate){
+        File outputFile = new File(Environment.getExternalStorageDirectory(), "photo_" + currentDate + ".jpg");
+        try {
+            Log.d("storeCameraPhoto", "called");
+            FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
+            fileOutputStream.flush();
+            fileOutputStream.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String currentDateFormat(){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HH_mm_ss");
+        String  currentTimeStamp = dateFormat.format(new Date());
+        return currentTimeStamp;
+    }
 }
