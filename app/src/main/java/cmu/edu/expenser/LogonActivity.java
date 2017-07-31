@@ -2,10 +2,10 @@ package cmu.edu.expenser;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -23,6 +23,8 @@ public class LogonActivity extends AppCompatActivity {
 
     private CallbackManager callbackManager;
     private LoginButton loginButton;
+    private boolean login = true;
+
     private String str_email;
     private String str_id;
     private String str_firstname;
@@ -34,6 +36,20 @@ public class LogonActivity extends AppCompatActivity {
         setContentView(R.layout.activity_logon);
 
         callbackManager = CallbackManager.Factory.create();
+
+        if (isFacebookLoggedIn()) {
+            Intent intent = new Intent(LogonActivity.this, MainActivity.class);
+            ArrayList<String> myList = new ArrayList<String>();
+            myList.add(str_email);
+            myList.add(str_id);
+            myList.add(str_firstname);
+            myList.add(str_lastname);
+
+            Bundle extras = new Bundle();
+            intent.putExtra("mylist", myList);
+            startActivity(intent);
+        }
+
         loginButton = (LoginButton) findViewById(R.id.usersettings_fragment_login_button);
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -94,4 +110,13 @@ public class LogonActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
+
+    public boolean isFacebookLoggedIn(){
+        return AccessToken.getCurrentAccessToken() != null;
+    }
+
+//    public void callActivityOnCreate() {
+//        ;
+//    }
+
 }
