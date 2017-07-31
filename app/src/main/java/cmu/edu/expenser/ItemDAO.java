@@ -14,7 +14,12 @@ import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.R.attr.id;
+import static android.R.attr.name;
+import static cmu.edu.expenser.R.string.people;
+import static cmu.edu.expenser.R.string.total;
 import static cmu.edu.expenser.SQLiteHelper.COLUMN_AVERAGE;
+import static com.facebook.internal.FacebookRequestErrorClassification.KEY_NAME;
 
 /**
  * Created by dandanshi on 29/07/2017.
@@ -24,8 +29,8 @@ public class ItemDAO {
     private SQLiteDatabase database;
     private SQLiteHelper dbHelper;
     private String[] allColumns = {
-            SQLiteHelper.COLUMN_USERID,
             SQLiteHelper.COLUMN_ID,
+            SQLiteHelper.COLUMN_USERID,
             SQLiteHelper.COLUMN_TOTAL,
             SQLiteHelper.COLUMN_DATE,
             SQLiteHelper.COLUMN_CATEGORY,
@@ -81,12 +86,16 @@ public class ItemDAO {
                 "_id=" + id, null); close();
     }
 
-//    public Cursor getAllItemTotal() {
-//        database = dbHelper.getReadableDatabase();
-//        return database.query(SQLiteHelper.TABLE_NAME, new String[] {"_id", "total"},
-//                null, null, null, null, "_id");
-//    }
-//
+    public void deleteItem(String userId, String total, String date, String category,
+                           String people, String photoUri) {
+        open();
+        String whereClause = "userId = ? and total = ? and date = ? and category = ? "
+                + "and people = ? and photoUri = ?";
+        String[] whereArgs = new String[] {userId, total, date, category,
+                people, photoUri};
+        database.delete(SQLiteHelper.TABLE_NAME, whereClause, whereArgs);
+        close();
+    }
 
     public Cursor getAllItems(String userId) {
         database = dbHelper.getReadableDatabase();
@@ -121,7 +130,7 @@ public class ItemDAO {
         return events;
     }
 
-    private Item cursorToItem(Cursor cursor) {
+    public Item cursorToItem(Cursor cursor) {
         String userId = cursor.getString(cursor.getColumnIndex(SQLiteHelper.COLUMN_USERID));
         int total = cursor.getInt(cursor.getColumnIndex(SQLiteHelper.COLUMN_TOTAL));
 

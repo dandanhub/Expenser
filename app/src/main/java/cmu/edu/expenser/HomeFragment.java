@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -17,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.app.Fragment;
+import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -46,10 +48,19 @@ import com.google.api.services.vision.v1.model.Image;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import static android.R.attr.priority;
+import static cmu.edu.expenser.R.string.date;
+import static cmu.edu.expenser.R.string.total;
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -71,9 +82,75 @@ public class HomeFragment extends Fragment {
 
     private ListView mListView;
     private Cursor result;
-    private CursorAdapter itemAdapter;
+    private ItemCursorAdapter itemAdapter;
 
     private OnFragmentInteractionListener mListener;
+
+    public class ItemCursorAdapter extends CursorAdapter {
+        public ItemCursorAdapter(Context context, Cursor cursor) {
+            super(context, cursor, 0);
+        }
+
+        // The newView method is used to inflate a new view and return it,
+        // you don't bind any data to the view at this point.
+        @Override
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+            return LayoutInflater.from(context).inflate(R.layout.item_list, parent, false);
+        }
+
+        // The bindView method is used to bind all data to a given view
+        // such as setting the text on a TextView.
+        @Override
+        public void bindView(View view, Context context, Cursor cursor) {
+            // Find fields to populate in inflated template
+            TextView itemTotal = (TextView) view.findViewById(R.id.itemTotal);
+            TextView itemDate = (TextView) view.findViewById(R.id.itemDate);
+            TextView itemCategory = (TextView) view.findViewById(R.id.itemCategory);
+            TextView itemPeople = (TextView) view.findViewById(R.id.itemPeople);
+            ImageView mMainImage =  (ImageView) view.findViewById(R.id.main_image);
+
+            // Extract properties from cursor
+            double total = cursor.getDouble(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TOTAL));
+            String date = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DATE));
+            String category = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_CATEGORY));
+            int people = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_PEOPLE));
+
+            String photoUri = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_PHOTOURI));
+            Log.d("photoUri", photoUri);
+            if (photoUri != null && photoUri.length() != 0) {
+                String storeFilename = "/photo_" + photoUri + ".jpg";
+                Bitmap bitmap = getImageFileFromSDCard(storeFilename);
+                mMainImage.setImageBitmap(bitmap);
+            }
+            else {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inMutable=true;
+                Bitmap bitmap = BitmapFactory.decodeResource(
+                        getApplicationContext().getResources(),
+                        R.drawable.placeholder,
+                        options);
+                mMainImage.setImageBitmap(bitmap);
+            }
+
+            // Populate fields with extracted properties
+            itemTotal.setText(String.valueOf(total));
+            itemDate.setText(date);
+            itemCategory.setText(category);
+            itemPeople.setText(String.valueOf(people));
+        }
+    }
+
+    private Bitmap getImageFileFromSDCard(String filename) {
+        Bitmap bitmap = null;
+        File imageFile = new File(Environment.getExternalStorageDirectory() + filename);
+        try {
+            FileInputStream fis = new FileInputStream(imageFile);
+            bitmap = BitmapFactory.decodeStream(fis);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return bitmap;
+    }
 
     public HomeFragment() {
         // Required empty public constructor
@@ -106,12 +183,7 @@ public class HomeFragment extends Fragment {
         }
 
         result = readItems();
-        String[] from = new String[] { SQLiteHelper.COLUMN_TOTAL, SQLiteHelper.COLUMN_DATE,
-                SQLiteHelper.COLUMN_CATEGORY, SQLiteHelper.COLUMN_PEOPLE};
-        int[] to = new int[] {R.id.itemTotal, R.id.itemDate, R.id.itemCategory, R.id.itemPeople};
-        itemAdapter = new SimpleCursorAdapter(getContext(), R.layout.item_list,
-                result, from, to, 0);
-        // itemAdapter.notifyDataSetChanged();
+        itemAdapter = new ItemCursorAdapter(getContext(), result);
     }
 
     public void onResume() {
@@ -127,6 +199,38 @@ public class HomeFragment extends Fragment {
 
         mListView = (ListView) view.findViewById(android.R.id.list);
         mListView.setAdapter(itemAdapter);
+
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                Cursor cursor = (Cursor) mListView.getItemAtPosition(position);
+
+                String userId = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_USERID));
+                double total = cursor.getDouble(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TOTAL));
+                String date = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DATE));
+                String category = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_CATEGORY));
+                int people = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_PEOPLE));
+                String photoUri = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_PHOTOURI));
+
+//                String userId = data.getUserId();
+//                Double total = data.getTotal();
+//                String date = data.getDate().toString();
+//                String category = data.getCategory();
+//                int people = data.getPeople();
+//                String photoUri = data.getPhotoUri();
+
+                Intent listItem = new Intent(getActivity(), ItemActivity.class);
+                listItem.putExtra("userId", userId);
+                listItem.putExtra("total", String.valueOf(total));
+                listItem.putExtra("date", date);
+                listItem.putExtra("category", category);
+                listItem.putExtra("people", String.valueOf(people));
+                listItem.putExtra("photoUri", photoUri);
+
+                startActivity(listItem);
+            }
+        });
 
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.floatBtn);
         fab.setOnClickListener(new View.OnClickListener() {

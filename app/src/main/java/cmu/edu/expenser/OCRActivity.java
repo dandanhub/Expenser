@@ -89,8 +89,6 @@ public class OCRActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             Context context = getApplicationContext();
-            Toast myToast = Toast.makeText(context, "Save Event Clicked!", Toast.LENGTH_SHORT);
-            myToast.show();
             saveItem();
             finish();
         }
@@ -423,7 +421,7 @@ public class OCRActivity extends AppCompatActivity {
     }
 
     private void storeCameraPhotoInSDCard(Bitmap bitmap, String currentDate){
-        File outputFile = new File(Environment.getExternalStorageDirectory(), "photo_" + currentDate + ".jpg");
+        File outputFile = new File(Environment.getExternalStorageDirectory(), "/photo_" + currentDate + ".jpg");
         try {
             Log.d("storeCameraPhoto", "called");
             FileOutputStream fileOutputStream = new FileOutputStream(outputFile);

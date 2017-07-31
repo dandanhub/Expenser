@@ -8,6 +8,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -88,11 +89,6 @@ public class InputActivity extends AppCompatActivity {
             dateEditText.setText(dateString);
         }
     }
-
-//    public void refreshListView() {
-//        HomeFragment homeFragment = (HomeFragment) MainActivity.homeFragment;
-//        homeFragment.refresh();
-//    }
 
     private void saveItem() {
         ItemDAO dbhelper = new ItemDAO(this);

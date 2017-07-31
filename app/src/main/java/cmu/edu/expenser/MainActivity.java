@@ -194,7 +194,7 @@ public class MainActivity extends AppCompatActivity
 //            switch (position) {
 //                case 0:
 //                    homeFragment.refresh();
-//                default:
+//                placeholder:
 //                    break;
 //            }
 //        }

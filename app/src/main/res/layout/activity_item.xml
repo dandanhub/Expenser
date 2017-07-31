@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="cmu.edu.expenser.OCRActivity">
+    tools:context="cmu.edu.expenser.ItemActivity">
 
     <!-- TODO: Update blank fragment layout -->
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -19,7 +19,7 @@
             android:layout_height="match_parent">
 
             <LinearLayout xmlns:android= "http://schemas.android.com/apk/res/android"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
@@ -137,13 +137,40 @@
                 </LinearLayout>
 
                 <Button style ="@style/Widget.AppCompat.Button.Colored"
+                    android:id="@+id/splitButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Split Bill With Facebook Friends">
+                </Button>
+
+                <LinearLayout xmlns:android= "http://schemas.android.com/apk/res/android"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                android:orientation="horizontal">
+
+                <Button style ="@style/Widget.AppCompat.Button.Colored"
                     android:id="@+id/saveItemButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:layout_gravity="center_horizontal"
+                    android:background="@color/colorAccent"
                     android:text="Save">
                 </Button>
+
+                <Button style ="@style/Widget.AppCompat.Button.Colored"
+                    android:id="@+id/deleteItemButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Delete">
+                </Button>
+            </LinearLayout>
+
             </LinearLayout>
 
         </ScrollView>
