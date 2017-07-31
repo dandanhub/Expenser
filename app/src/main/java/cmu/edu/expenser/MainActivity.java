@@ -20,6 +20,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
+import com.facebook.login.LoginManager;
+
 public class MainActivity extends AppCompatActivity
         implements HomeFragment.OnFragmentInteractionListener,
         SummaryFragment.OnFragmentInteractionListener {
@@ -119,6 +125,17 @@ public class MainActivity extends AppCompatActivity
                     return true;
                 }
             });
+
+            MenuItem logout = popupMenu.getMenu().findItem(R.id.logout);
+            logout.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    disconnectFromFacebook();
+                    startActivity(new Intent(getApplicationContext(), LogonActivity.class));
+                    return true;
+                }
+            });
+
             popupMenu.show();
             return true;
         }
@@ -218,5 +235,24 @@ public class MainActivity extends AppCompatActivity
             }
             return null;
         }
+    }
+
+    public void disconnectFromFacebook() {
+
+        System.out.println("1 stop here!");
+        if (AccessToken.getCurrentAccessToken() == null) {
+            System.out.println("2 stop here!");
+            return; // already logged out
+        }
+        new GraphRequest(AccessToken.getCurrentAccessToken(), "/me/permissions/", null, HttpMethod.DELETE, new GraphRequest
+                .Callback() {
+            @Override
+            public void onCompleted(GraphResponse graphResponse) {
+                System.out.println("3 stop here!");
+                AccessToken.setCurrentAccessToken(null);
+                LoginManager.getInstance().logOut();
+                startActivity(new Intent(getApplicationContext(), LogonActivity.class));
+            }
+        }).executeAsync();
     }
 }

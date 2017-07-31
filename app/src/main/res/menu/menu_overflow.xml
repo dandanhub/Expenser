@@ -10,6 +10,6 @@
         android:title="@string/input"/>
 
     <item
-        android:id="@+id/input"
+        android:id="@+id/logout"
         android:title="@string/logout"/>
 </menu>

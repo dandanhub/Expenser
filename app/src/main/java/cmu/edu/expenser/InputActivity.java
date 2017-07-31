@@ -27,13 +27,12 @@ public class InputActivity extends AppCompatActivity {
     private static Spinner categorySpinner;
     private static EditText peopleEditText;
     private static Button saveItemButton;
+    private static String partFilename = "";
 
     View.OnClickListener saveItemButtonClicked = new View.OnClickListener(){
         @Override
         public void onClick(View v) {
             Context context = getApplicationContext();
-            Toast myToast = Toast.makeText(context, "Save Event Clicked!", Toast.LENGTH_SHORT);
-            myToast.show();
             saveItem();
             finish();
         }
@@ -102,6 +101,6 @@ public class InputActivity extends AppCompatActivity {
         String dateString = dateEditText.getText().toString();
         String category = categorySpinner.getSelectedItem().toString();
         int people = Integer.valueOf(peopleEditText.getText().toString());
-        dbhelper.insertItem(userId, total, dateString, category, people);
+        dbhelper.insertItem(userId, total, dateString, category, people, partFilename);
     }
 }

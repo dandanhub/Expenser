@@ -179,7 +179,7 @@ public class OCRActivity extends AppCompatActivity {
         String dateString = dateEditText.getText().toString();
         String category = categorySpinner.getSelectedItem().toString();
         int people = Integer.valueOf(peopleEditText.getText().toString());
-        dbhelper.insertItem(userId, total, dateString, category, people);
+        dbhelper.insertItem(userId, total, dateString, category, people, partFilename);
     }
 
     public void startGalleryChooser() {
