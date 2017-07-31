@@ -92,7 +92,7 @@
                 <Spinner android:id="@+id/categorySpinner"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
-                    android:background="@android:drawable/btn_dropdown"
+                    android:background="@android:color/transparent"
                     android:spinnerMode="dropdown" />
 
                 <EditText android:id="@+id/peopleEditText"
@@ -106,7 +106,8 @@
 
         </LinearLayout>
 
-        <Button android:id="@+id/saveItemButton"
+        <Button style ="@style/Widget.AppCompat.Button.Colored"
+            android:id="@+id/saveItemButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"

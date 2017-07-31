@@ -45,13 +45,15 @@ public class ItemDAO {
         dbHelper.close();
     }
 
-    public void insertItem(String userId, double total, String date, String category, int people) {
+    public void insertItem(String userId, double total, String date, String category, int people,
+                           String photoUri) {
         ContentValues newItem = new ContentValues();
         newItem.put(SQLiteHelper.COLUMN_USERID, userId);
         newItem.put(SQLiteHelper.COLUMN_TOTAL, total);
         newItem.put(SQLiteHelper.COLUMN_DATE, date);
         newItem.put(SQLiteHelper.COLUMN_CATEGORY, category);
         newItem.put(SQLiteHelper.COLUMN_PEOPLE, people);
+        newItem.put(SQLiteHelper.COLUMN_PHOTOURI, photoUri);
 
         double average = total / people;
         newItem.put(SQLiteHelper.COLUMN_AVERAGE, average);
@@ -61,13 +63,15 @@ public class ItemDAO {
         close();
     }
 
-    public void updateItem(long id, String userId, double total, String date, String category, int people)  {
+    public void updateItem(long id, String userId, double total, String date, String category,
+                           int people, String photoUri)  {
         ContentValues editItem = new ContentValues();
         editItem.put(SQLiteHelper.COLUMN_USERID, userId);
         editItem.put(SQLiteHelper.COLUMN_TOTAL, total);
         editItem.put(SQLiteHelper.COLUMN_DATE, date);
         editItem.put(SQLiteHelper.COLUMN_CATEGORY, category);
         editItem.put(SQLiteHelper.COLUMN_PEOPLE, people);
+        editItem.put(SQLiteHelper.COLUMN_PHOTOURI, photoUri);
 
         double average = total / people;
         editItem.put(SQLiteHelper.COLUMN_AVERAGE, average);
@@ -87,7 +91,7 @@ public class ItemDAO {
     public Cursor getAllItems(String userId) {
         database = dbHelper.getReadableDatabase();
         String[] tableColumns = new String[] {"_id", "userID", "total",
-                "date", "category", "people", "average"};
+                "date", "category", "people", "average", "photoUri"};
         String whereClause = "userID = ?";
         String[] whereArgs = new String[] {userId};
         String orderBy = "date";
@@ -100,7 +104,7 @@ public class ItemDAO {
     public List<Item> getAllItemsLists(String userId) {
         List<Item> events = new ArrayList<Item>();
         String[] tableColumns = new String[] {"_id", "userID", "total",
-                "date", "category", "people", "average"};
+                "date", "category", "people", "average", "photoUri"};
         String whereClause = "userID = ?";
         String[] whereArgs = new String[] {userId};
         String orderBy = "date";
@@ -132,8 +136,8 @@ public class ItemDAO {
 
         String category = cursor.getString(cursor.getColumnIndex(SQLiteHelper.COLUMN_CATEGORY));
         int people = cursor.getInt(cursor.getColumnIndex(SQLiteHelper.COLUMN_PEOPLE));
-
-        Item item = new Item(userId, total, transactionDate, category, people);
+        String photoUri = cursor.getString(cursor.getColumnIndex(SQLiteHelper.COLUMN_PHOTOURI));
+        Item item = new Item(userId, total, transactionDate, category, people, photoUri);
         return item;
     }
 
