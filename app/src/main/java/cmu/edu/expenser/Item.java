@@ -13,8 +13,7 @@ public class Item {
     private String category;
     private int people;
     private double average;
-
-    private static long counter = 0;
+    
 
     public Item(){
 

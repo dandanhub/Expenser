@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#3b5998"
+    tools:context="cmu.edu.expenser.LogonActivity">
+
+    <LinearLayout
+        android:layout_width="368dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteY="0dp"
+        tools:layout_editor_absoluteX="8dp">
+
+        <ImageView
+            android:id="@+id/usersettings_fragment_logo_image"
+            android:layout_width="193dp"
+            android:layout_height="44dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="35dp"
+            android:contentDescription="@string/app_name"/>
+
+        <TextView
+            android:id="@+id/usersettings_fragment_profile_name"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:lines="1"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="35dp"
+            android:gravity="center"/>
+
+        <com.facebook.login.widget.LoginButton
+            android:id="@+id/usersettings_fragment_login_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="35dp"
+            android:layout_marginBottom="35dp"
+            android:background="#3b5998" />
+
+    </LinearLayout>
+</android.support.constraint.ConstraintLayout>

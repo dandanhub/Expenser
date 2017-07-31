@@ -9,6 +9,7 @@
 
     <string name="scan">Scan</string>
     <string name="input">Input</string>
+    <string name="logout">Log out</string>
 
     <string name="image_details_header">Details:</string>
     <string name="image_preview_header">Preview:</string>
@@ -23,5 +24,8 @@
     <string name="pickDate">Pick the transanction Date</string>
     <string name="category">Category:</string>
     <string name="people">People:</string>
+
+    <string name="facebook_app_id">106805313329035</string>
+    <string name="fb_login_protocol_scheme">fb106805313329035</string>
 
 </resources>
