@@ -105,7 +105,7 @@
                         <EditText android:id="@+id/totalEditText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="number"
+                            android:inputType="numberDecimal|numberSigned"
                             android:imeOptions="actionDone">
                         </EditText>
 
@@ -142,7 +142,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:layout_gravity="center_horizontal"
-                    android:text="Split Bill With Facebook Friends">
+                    android:text="Split Bill">
                 </Button>
 
                 <LinearLayout xmlns:android= "http://schemas.android.com/apk/res/android"
@@ -151,15 +151,14 @@
                     android:layout_gravity="center"
                 android:orientation="horizontal">
 
-                <Button style ="@style/Widget.AppCompat.Button.Colored"
-                    android:id="@+id/saveItemButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_gravity="center_horizontal"
-                    android:background="@color/colorAccent"
-                    android:text="Save">
-                </Button>
+                    <Button style ="@style/Widget.AppCompat.Button.Colored"
+                        android:id="@+id/saveItemButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_gravity="center_horizontal"
+                        android:text="Save">
+                    </Button>
 
                 <Button style ="@style/Widget.AppCompat.Button.Colored"
                     android:id="@+id/deleteItemButton"

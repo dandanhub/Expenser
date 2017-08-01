@@ -21,6 +21,9 @@ import android.widget.Toast;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import static cmu.edu.expenser.R.string.people;
+import static cmu.edu.expenser.R.string.total;
+
 public class InputActivity extends AppCompatActivity {
 
     private static EditText totalEditText;
@@ -86,17 +89,36 @@ public class InputActivity extends AppCompatActivity {
             calendar.set(year, month, day);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String dateString = sdf.format(calendar.getTime());
-            dateEditText.setText(dateString);
+            if (dateEditText != null) {
+                dateEditText.setText(dateString);
+            }
         }
     }
 
     private void saveItem() {
         ItemDAO dbhelper = new ItemDAO(this);
         String userId = "test";
-        double total = Double.valueOf(totalEditText.getText().toString());
+
+        String totalStr = totalEditText.getText().toString().trim();
+        if (totalStr == null || totalStr.length() == 0) {
+            Toast.makeText(this, "Please input your total expense amount!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        double total = Double.valueOf(totalStr);
         String dateString = dateEditText.getText().toString();
+        if (dateString == null || dateString.length() == 0) {
+            Calendar calendar = Calendar.getInstance();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            dateString = sdf.format(calendar.getTime());
+            dateEditText.setText(dateString);
+        }
         String category = categorySpinner.getSelectedItem().toString();
-        int people = Integer.valueOf(peopleEditText.getText().toString());
+
+        int people = 1;
+        String peopleStr = peopleEditText.getText().toString();
+        if (peopleStr != null && peopleStr.length() != 0) {
+            people = Integer.valueOf(peopleStr);
+        }
         dbhelper.insertItem(userId, total, dateString, category, people, partFilename);
     }
 }

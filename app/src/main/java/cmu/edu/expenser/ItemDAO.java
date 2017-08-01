@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -68,10 +69,9 @@ public class ItemDAO {
         close();
     }
 
-    public void updateItem(long id, String userId, double total, String date, String category,
+    public void updateItem(long id, double total, String date, String category,
                            int people, String photoUri)  {
         ContentValues editItem = new ContentValues();
-        editItem.put(SQLiteHelper.COLUMN_USERID, userId);
         editItem.put(SQLiteHelper.COLUMN_TOTAL, total);
         editItem.put(SQLiteHelper.COLUMN_DATE, date);
         editItem.put(SQLiteHelper.COLUMN_CATEGORY, category);
@@ -107,6 +107,19 @@ public class ItemDAO {
 
         Cursor cursor = database.query(
                 SQLiteHelper.TABLE_NAME, tableColumns, whereClause, whereArgs, null, null, orderBy);
+        return cursor;
+    }
+
+    public Cursor getMonthItems(String userId, String month) {
+        database = dbHelper.getReadableDatabase();
+        String[] tableColumns = new String[] { "userID", "category", "SUM(average)"};
+        String whereClause = "userID = ? AND date LIKE ?";
+        String[] whereArgs = new String[] {userId, month + "%"};
+        String groupBy = "category";
+        // String having = "";
+
+        Cursor cursor = database.query(
+                SQLiteHelper.TABLE_NAME, tableColumns, whereClause, whereArgs, groupBy, null, null);
         return cursor;
     }
 

@@ -72,8 +72,8 @@ public class LogonActivity extends AppCompatActivity {
                                 System.out.println("JSON Result" + jsonresult);
                                 // str_email = json.getString("email");
                                 str_id = json.getString("id");
-                                str_firstname = json.getString("first_name");
-                                str_lastname = json.getString("last_name");
+                                 str_firstname = json.getString("first_name");
+                                 str_lastname = json.getString("last_name");
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }

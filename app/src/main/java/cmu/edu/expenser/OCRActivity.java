@@ -1,6 +1,7 @@
 package cmu.edu.expenser;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -19,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -49,6 +51,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -58,6 +61,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import java.util.Date;
+
+import static android.R.attr.format;
+import static cmu.edu.expenser.R.string.total;
 
 public class OCRActivity extends AppCompatActivity {
 
@@ -80,10 +86,9 @@ public class OCRActivity extends AppCompatActivity {
     private static EditText peopleEditText;
     private static Button saveItemButton;
 
-    private long counter = 0;
-    private String mCurrentPhotoPath;
-
     private Bitmap bitmap;
+
+    private String action;
 
     View.OnClickListener saveItemButtonClicked = new View.OnClickListener(){
         @Override
@@ -99,22 +104,32 @@ public class OCRActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ocr);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder
-                .setMessage(R.string.dialog_select_prompt)
-                .setPositiveButton(R.string.dialog_select_gallery, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        startGalleryChooser();
-                    }
-                })
-                .setNegativeButton(R.string.dialog_select_camera, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        startCamera();
-                    }
-                });
-        builder.create().show();
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder
+//                .setMessage(R.string.dialog_select_prompt)
+//                .setPositiveButton(R.string.dialog_select_gallery, new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        startGalleryChooser();
+//                    }
+//                })
+//                .setNegativeButton(R.string.dialog_select_camera, new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        startCamera();
+//                    }
+//                });
+//        builder.create().show();
+
+        action =  getIntent().getStringExtra("action");
+        if (action != null && action.equals("gallery")) {
+            startGalleryChooser();
+        }
+        else if (action != null && action.equals("camera")) {
+            startCamera();
+        }
 
         mImageDetails = (TextView) findViewById(R.id.image_details);
         mMainImage = (ImageView) findViewById(R.id.main_image);
@@ -124,7 +139,7 @@ public class OCRActivity extends AppCompatActivity {
         dateEditText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DialogFragment newFragment = new DatePickerFragment();
+                DialogFragment newFragment = new OCRActivity.DatePickerFragment();
                 newFragment.show(getSupportFragmentManager(), "datePicker");
             }
         });
@@ -167,16 +182,38 @@ public class OCRActivity extends AppCompatActivity {
     }
 
     private void saveItem() {
-        String partFilename = currentDateFormat();
-        storeCameraPhotoInSDCard(bitmap, partFilename);
-        Log.d("image path", partFilename);
+        String partFilename = "";
+        if (bitmap != null) {
+            partFilename = currentDateFormat();
+            storeCameraPhotoInSDCard(bitmap, partFilename);
+        }
 
         ItemDAO dbhelper = new ItemDAO(this);
         String userId = "test";
-        double total = Double.valueOf(totalEditText.getText().toString());
+
+        String totalStr = totalEditText.getText().toString().trim();
+        if (totalStr == null || totalStr.length() == 0) {
+            Toast.makeText(this, "Please input your total expense amount!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        double total = Double.valueOf(totalStr);
+
         String dateString = dateEditText.getText().toString();
+        if (dateString == null || dateString.length() == 0) {
+            Calendar calendar = Calendar.getInstance();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            dateString = sdf.format(calendar.getTime());
+            dateEditText.setText(dateString);
+        }
+
         String category = categorySpinner.getSelectedItem().toString();
-        int people = Integer.valueOf(peopleEditText.getText().toString());
+
+        int people = 1;
+        String peopleStr = peopleEditText.getText().toString();
+        if (peopleStr != null && peopleStr.length() != 0) {
+            people = Integer.valueOf(peopleStr);
+        }
+
         dbhelper.insertItem(userId, total, dateString, category, people, partFilename);
     }
 
@@ -219,6 +256,10 @@ public class OCRActivity extends AppCompatActivity {
         } else if (requestCode == CAMERA_IMAGE_REQUEST && resultCode == android.app.Activity.RESULT_OK) {
             Uri photoUri = FileProvider.getUriForFile(this, getPackageName() + ".provider", getCameraFile());
             uploadImage(photoUri);
+        }
+        else if (resultCode == android.app.Activity.RESULT_CANCELED)
+        {
+            finish();
         }
     }
 
@@ -346,8 +387,12 @@ public class OCRActivity extends AppCompatActivity {
 
             protected void onPostExecute(String result) {
                 String total = parseTotal(result);
+                String date = parseDate(result);
                 mImageDetails.setText("");
                 totalEditText.setText(total);
+                if (date != null && date.length() != 0) {
+                    dateEditText.setText(date);
+                }
             }
         }.execute();
     }
@@ -371,16 +416,36 @@ public class OCRActivity extends AppCompatActivity {
         return String.valueOf(total);
     }
 
+    public static boolean isValidFormat(String format, String value) {
+        Date date = null;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat(format);
+            date = sdf.parse(value);
+            if (!value.equals(sdf.format(date))) {
+                date = null;
+            }
+        } catch (ParseException ex) {
+            ex.printStackTrace();
+        }
+        return date != null;
+    }
+
     private String parseDate(String str) {
-        double total = 0.00;
-        String[] tokens = str.split("\\d+\\.\\d{2}");
-        for (int i = 0; i < tokens.length; i++) {
-            double d = Double.parseDouble(tokens[i]);
-            if (total < d) {
-                total = d;
+        String[] formats= {"M/y", "M/d/y", "M-d-y"};
+        String[] tokens = str.split("\\s");
+        for (int i = 0; i < formats.length; i++) {
+            for (int j = 0; j < tokens.length; j++) {
+                if (isValidFormat(formats[i], tokens[j])) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    String dateString = sdf.format(tokens[j]);
+                    return dateString;
+                }
             }
         }
-        return String.valueOf(total);
+
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(calendar.getTime());
     }
 
     public Bitmap scaleBitmapDown(Bitmap bitmap, int maxDimension) {

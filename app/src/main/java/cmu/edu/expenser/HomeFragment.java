@@ -51,6 +51,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -114,8 +115,9 @@ public class HomeFragment extends Fragment {
             String date = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DATE));
             String category = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_CATEGORY));
             int people = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_PEOPLE));
-
             String photoUri = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_PHOTOURI));
+            double avg = cursor.getDouble(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_AVERAGE));
+
             Log.d("photoUri", photoUri);
             if (photoUri != null && photoUri.length() != 0) {
                 String storeFilename = "/photo_" + photoUri + ".jpg";
@@ -133,7 +135,8 @@ public class HomeFragment extends Fragment {
             }
 
             // Populate fields with extracted properties
-            itemTotal.setText(String.valueOf(total));
+            DecimalFormat formatter = new DecimalFormat("#0.00");
+            itemTotal.setText(formatter.format(avg));
             itemDate.setText(date);
             itemCategory.setText(category);
             itemPeople.setText(String.valueOf(people));
@@ -206,6 +209,7 @@ public class HomeFragment extends Fragment {
 
                 Cursor cursor = (Cursor) mListView.getItemAtPosition(position);
 
+                int itemId = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_ID));
                 String userId = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_USERID));
                 double total = cursor.getDouble(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TOTAL));
                 String date = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DATE));
@@ -213,14 +217,8 @@ public class HomeFragment extends Fragment {
                 int people = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_PEOPLE));
                 String photoUri = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_PHOTOURI));
 
-//                String userId = data.getUserId();
-//                Double total = data.getTotal();
-//                String date = data.getDate().toString();
-//                String category = data.getCategory();
-//                int people = data.getPeople();
-//                String photoUri = data.getPhotoUri();
-
                 Intent listItem = new Intent(getActivity(), ItemActivity.class);
+                listItem.putExtra("itemId", String.valueOf(itemId));
                 listItem.putExtra("userId", userId);
                 listItem.putExtra("total", String.valueOf(total));
                 listItem.putExtra("date", date);
@@ -236,7 +234,26 @@ public class HomeFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getContext(), OCRActivity.class));
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder
+                        .setMessage(R.string.dialog_select_prompt)
+                        .setPositiveButton(R.string.dialog_select_gallery, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent listItem = new Intent(getContext(), OCRActivity.class);
+                                listItem.putExtra("action", "gallery");
+                                startActivity(listItem);
+                            }
+                        })
+                        .setNegativeButton(R.string.dialog_select_camera, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent listItem = new Intent(getContext(), OCRActivity.class);
+                                listItem.putExtra("action", "camera");
+                                startActivity(listItem);
+                            }
+                        });
+                builder.create().show();
             }
         });
 
@@ -244,14 +261,7 @@ public class HomeFragment extends Fragment {
     }
 
     public void refresh() {
-        Log.d("on refresh", "called");
-        // mListView.invalidateViews();
         Cursor newCursor = readItems();
-//        String[] from = new String[] { SQLiteHelper.COLUMN_TOTAL, SQLiteHelper.COLUMN_DATE,
-//                SQLiteHelper.COLUMN_CATEGORY, SQLiteHelper.COLUMN_PEOPLE, SQLiteHelper.COLUMN_AVERAGE};
-//        int[] to = new int[] {R.id.itemTotal, R.id.itemDate, R.id.itemCategory, R.id.itemPeople, R.id.itemAvg};
-//        itemAdapter = new SimpleCursorAdapter(getContext(), R.layout.item_list,
-//                result, from, to, 0);
         result = itemAdapter.swapCursor(newCursor);
         itemAdapter.notifyDataSetChanged();
     }

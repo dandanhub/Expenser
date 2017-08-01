@@ -1,5 +1,6 @@
 package cmu.edu.expenser;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
@@ -25,6 +27,10 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
+
+import static cmu.edu.expenser.R.string.date;
+import static cmu.edu.expenser.R.string.people;
+import static cmu.edu.expenser.R.string.total;
 
 public class MainActivity extends AppCompatActivity
         implements HomeFragment.OnFragmentInteractionListener,
@@ -65,26 +71,6 @@ public class MainActivity extends AppCompatActivity
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
-//        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-//            @Override
-//            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-//
-//            }
-//
-//            @Override
-//            public void onPageSelected(int position) {
-//                Log.d("MainActivity", "onPageSelected");
-//                if (position == 0) {
-//                    Log.d("MainActivity", "Postion = 0");
-//                    homeFragment.refresh();
-//                }
-//            }
-//
-//            @Override
-//            public void onPageScrollStateChanged(int state) {
-//
-//            }
-//        });
     }
 
 
@@ -112,7 +98,27 @@ public class MainActivity extends AppCompatActivity
             scan.setOnMenuItemClickListener(new OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
-                    startActivity(new Intent(getApplicationContext(), OCRActivity.class));
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder
+                            .setMessage(R.string.dialog_select_prompt)
+                            .setPositiveButton(R.string.dialog_select_gallery, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent listItem = new Intent(getBaseContext(), OCRActivity.class);
+                                    listItem.putExtra("action", "gallery");
+                                    startActivity(listItem);
+                                }
+                            })
+                            .setNegativeButton(R.string.dialog_select_camera, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent listItem = new Intent(getBaseContext(), OCRActivity.class);
+                                    listItem.putExtra("action", "camera");
+                                    startActivity(listItem);
+                                }
+                            });
+                    builder.create().show();
+
                     return true;
                 }
             });

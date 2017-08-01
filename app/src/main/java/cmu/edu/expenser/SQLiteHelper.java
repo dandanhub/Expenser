@@ -14,7 +14,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Expenser";
     public static final int DATABASE_VERSION = 1;
 
-    public static final String COLUMN_ID = "id";
+    public static final String COLUMN_ID = "_id";
     public static final String COLUMN_USERID = "userId";
     public static final String COLUMN_TOTAL = "total";
     public static final String COLUMN_DATE = "date";
